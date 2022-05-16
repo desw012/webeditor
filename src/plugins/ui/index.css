@@ -1,0 +1,189 @@
+.XClickEditor {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.XClickEditor button {
+	background: inherit;
+	border:none;
+	box-shadow:none;
+	border-radius:0;
+	padding:0;
+	overflow:visible;
+	cursor:pointer
+}
+
+.XClickEditor ul {
+	list-style: none;
+	margin : 0;
+	padding : 0;
+}
+
+.XClickEditor .div_layer{
+	position: absolute;
+}
+.XClickEditor .div_layer:focus{
+	outline: none;
+}
+
+.ContentContainer {
+	position: relative;
+	width: 100%;
+	height: calc(100% - 27px);
+	background-color: #FFFFFF;
+	margin-top: 27px;
+	border: none;
+}
+
+.ToolbarContainer {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 26px;
+	border-bottom: 1px solid rgb(206, 206, 206);
+}
+.ToolbarContainer > ul > li { float: left; }
+.ToolbarContainer .toolbar-item {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	width: 25px;
+	height: 24px;
+}
+.ToolbarContainer .toolbar-item.active {
+	border-style: inset;
+}
+
+.ToolbarContainer .toolbar-item.toolbar-select {
+	width: 75px;
+	text-align: left;
+	padding-right: 10px;
+}
+.ToolbarContainer .toolbar-item.toolbar-select > span {
+	width: 100%;
+}
+.ToolbarContainer .toolbar-item.toolbar-select::after {
+	content: '▼';
+}
+.ToolbarContainer .separator-bar {
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+
+.ToolbarContainer .layer_select {
+	background-color: white;
+	width: 170px;
+	max-height: 120px;
+	overflow: auto;
+}
+
+.ToolbarContainer .layer_select button {
+	width: 100%;
+	text-align: left;
+}
+
+.layer_color_select {
+	display: grid;
+	grid-template-columns: repeat(10, 14px);
+	grid-template-rows: repeat(10, 14px);
+}
+
+.layer_symbol_select {
+	display: grid;
+	grid-template-columns: repeat(15, 18px);
+	grid-template-rows: repeat(10, 18px);
+}
+
+.layer_table_select {
+	display: grid;
+	grid-template-columns: repeat(10, 14px);
+	grid-template-rows: repeat(10, 14px);
+}
+
+.layer_color_select button,
+.layer_symbol_select button,
+.layer_table_select button {
+	width: 100%;
+	height: 100%;
+	vertical-align: top;
+}
+.layer_table_select > div {
+	border : solid 1px;
+	margin : 1px;
+}
+.layer_table_select > div.active {
+	background-color: #bcdefb;
+	border-color: #1F89E5;
+}
+
+
+.XClickEditor iframe {
+	width: 100%;
+	height: 100%;
+}
+/*
+.ContentContainer .div_layer.link {
+	width: 260px;
+	height: 26px;
+	padding: 5px;
+	background-color: red;
+}
+.ContentContainer .div_layer.link input {
+	height: 100%;
+	width: calc(100% - 80px);
+	box-sizing: border-box;
+}
+.ContentContainer .div_layer.link button {
+	height: 100%;
+	width: 40px;
+}
+*/
+
+
+/**
+ * widget
+ */
+.ContentContainer .widget { }
+.widget .dim {
+	position: absolute;
+	top : 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.widget .outline > div {
+	position: absolute;
+	background-color: yellow;
+}
+.widget .newline > .before,
+.widget .newline > .after {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
+
+.widget .resize-bar {
+	position: absolute;
+}
+
+.widget .link {
+	position: absolute;
+	width: 260px;
+	height: 26px;
+	padding: 5px;
+	background-color: red;
+}
+.widget .link input {
+	height: 100%;
+	width: calc(100% - 80px);
+	box-sizing: border-box;
+}
+.widget .link button {
+	height: 100%;
+	width: 40px;
+}

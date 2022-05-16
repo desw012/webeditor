@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+    </head>
+    <body>
+        <div id="editor1" style="height: 500px; margin: 50px; border: 1px solid"></div>
+<!--        <div id="editor2" style="height: 500px;"></div>-->
+        <script src="/dist/bundle.js"></script>
+        <script>
+            const config = {
+                locale : 'ko',
+                id : 'editor1',
+                root : document.getElementById('editor1')
+            }
+            xClickEditor.create(config);
+            setTimeout(()=>{
+                window.editor1 = xClickEditor.get('editor1');
+            })
+
+
+
+            // const config2 = {
+            //     locale : 'ko',
+            //     id : 'editor2',
+            //     root : document.getElementById('editor2')
+            // }
+            // const editor2 = xClickEditor.create(config2);
+        </script>
+    </body>
+</html>
