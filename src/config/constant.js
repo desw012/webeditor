@@ -7,6 +7,22 @@ export const BLOCK_TAGS = [
 ];
 
 /**
+ * w3c
+ */
+export const PROHIBITED_PARAGRAPH_CHILD_NAME = [
+    'ADDRESS', 'ARTICLE', 'ASIDE', 'BLOCKQUOTE', 'CAPTION',
+    'CENTER', 'COL', 'COLGROUP', 'DD', 'DETAILS',
+    'DIR', 'DIV', 'DL', 'DT', 'FIELDSET',
+    'FIGCAPTION', 'FIGURE', 'FOOTER', 'FORM', 'H1',
+    'H2', 'H3', 'H4', 'H5', 'H6',
+    'HEADER', 'HGROUP', 'HR', 'LI', 'LISTING',
+    'MENU', 'NAV', 'OL', 'P', 'PLAINTEXT',
+    'PRE', 'SECTION', 'SUMMARY', 'TABLE', 'TBODY',
+    'TD', 'TFOOT', 'TH', 'THEAD', 'TR',
+    'UL', 'XMP'
+]
+
+/**
  * BLOCK 노드
  */
 export const BLOCK_NODE = [

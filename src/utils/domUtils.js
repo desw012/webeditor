@@ -573,20 +573,28 @@ export const removeNodeAndMoveToParent = (node) => {
     node.parentNode.removeChild(node);
 }
 
-export const renameTag = (src, nodeName) => {
-    if(src.tagName === nodeName.toUpperCase()) return;
+/**
+ * 노드의 이름을 변경.
+ * algorithm https://w3c.github.io/editing/docs/execCommand/#common-algorithms
+ */
+export const renameTagName = (node, nodeName) => {
+    if(node.tagName === nodeName.toUpperCase()) return node;
+    if(!node.parentNode) return node;
 
-    const dest = document.createElement(nodeName);
+    const newNode = document.createElement(nodeName);
+    node.parentNode.insertBefore(newNode, node);
 
-    while (src.firstChild) {
-        dest.appendChild(src.firstChild);
+    for (let i = node.attributes.length - 1; i >= 0; --i) {
+        newNode.attributes.setNamedItem(node.attributes[i].cloneNode());
     }
 
-    for (let i = src.attributes.length - 1; i >= 0; --i) {
-        dest.attributes.setNamedItem(src.attributes[i].cloneNode());
+    while (node.firstChild) {
+        newNode.appendChild(node.firstChild);
     }
 
-    src.parentNode.replaceChild(dest, src);
+    node.parentNode.removeChild(node);
+
+    return newNode;
 }
 
 //==================================================
@@ -621,7 +629,11 @@ export const deleteContents = (range) => {
         if(curr === sc && isCharacterDataNode(curr)){
             curr.deleteData(so, curr.length);
         } else {
-            removeNode(curr);
+            if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
+                removeChildNodeAll(curr);
+            } else {
+                removeNode(curr)
+            }
         }
     }
 
@@ -630,16 +642,30 @@ export const deleteContents = (range) => {
     while(curr = next){
         next = curr.nextSibling;
         if(next.contains(ec)){ break; }
-        removeNode(curr);
+        if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
+            removeChildNodeAll(curr);
+        } else {
+            removeNode(curr)
+        }
     }
 
     //3.
-    next = p.firstChild;
-    while( curr = next ){
-        while(next = curr.firstChild){
-
+    next = ec, p;
+    while(curr = next) {
+        p = curr;
+        while( p.parentNode != cc && !(next = p.previousSibling) ){
+            p = p.parentNode;
         }
 
+        if(curr === sc && isCharacterDataNode(curr)){
+            curr.deleteData(eo, curr.length);
+        } else {
+            if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
+                removeChildNodeAll(curr);
+            } else {
+                removeNode(curr)
+            }
+        }
     }
 }
 
