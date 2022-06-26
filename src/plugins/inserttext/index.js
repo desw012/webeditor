@@ -1,5 +1,12 @@
 import Plugin from "../../core/Plugin";
-import { insertAfter, insertBefore, isCharacterDataNode, splitRange} from "../../utils/domUtils";
+import {
+    deleteContents,
+    insertAfter,
+    insertBefore,
+    isCharacterDataNode,
+    splitRange,
+    splitTextNode
+} from "../../utils/domUtils";
 import { Commands } from "../../core/Command";
 
 /**
@@ -31,9 +38,28 @@ export default class InsertText extends Plugin {
 
         this.undo.flush();
 
+        //FIXME
+        this.ui.document.execCommand('insertText', false, payload);
+
         //range.deleteContents();
-        const textNode = document.createTextNode(payload);
-        range.insertNode(textNode);
+        //deleteContents(range);
+        //this.ui.document.execCommand('insertHtml', false, payload);
+        /*
+        if(range.collapsed){
+
+        } else {
+            deleteContents(range);
+        }
+
+        debugger;
+        // ≈
+        // if(range.collapsed){
+        //     if(range.endContainer)
+        // }
+
+        //range = splitTextNode(range);
+        //const textNode = document.createTextNode(payload);
+        //range.insertNode(textNode);
         //
         //
         // if( range.collapsed && isCharacterDataNode(range.commonAncestorContainer) ){
@@ -51,6 +77,7 @@ export default class InsertText extends Plugin {
         //     range.deleteContents();
         // }
 
-        this.selection.collapse(textNode, textNode.length);
+        //this.selection.collapse(textNode, textNode.length);
+         */
     }
 }
