@@ -9,7 +9,7 @@ export const BLOCK_TAGS = [
 /**
  * w3c
  */
-export const PROHIBITED_PARAGRAPH_CHILD_NAME = [
+export const BLOCK_TAG_NAME = [
     'ADDRESS', 'ARTICLE', 'ASIDE', 'BLOCKQUOTE', 'CAPTION',
     'CENTER', 'COL', 'COLGROUP', 'DD', 'DETAILS',
     'DIR', 'DIV', 'DL', 'DT', 'FIELDSET',

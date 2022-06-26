@@ -618,55 +618,117 @@ export const deleteContents = (range) => {
     const ec = range.endContainer;
     const eo = range.endOffset;
 
-    let curr, next = sc, p;
+    if(sc === ec && isCharacterDataNode(cc)){
+        cc.deleteData(so, eo);
+        const _range = new Range()
+        _range.setStart(cc, so);
+        _range.setEnd(cc, so);
+        return _range;
+    }
+
+    //let curr, next = sc, p;
+
+    const iterator = document.createNodeIterator(
+        cc
+        , NodeFilter.SHOW_ALL
+        , (node) => {
+            return NodeFilter.FILTER_ACCEPT;
+        });
+    let curr, find = false;
+
+
+
+    while(curr = iterator.nextNode()){
+        if(curr === sc) { find = true; }
+        if(!find) continue;
+        if(curr.contains(sc)) {
+            if(curr === sc){
+                curr.deleteData(so, curr.length)
+            } else {
+                continue
+            }
+        }
+
+        if (curr.contains(ec)) {
+            if(curr === ec) {
+                curr.deleteData(0, curr)
+            } else {
+                continue
+            }
+        }
+
+        if(sc === curr){
+            if(isCharacterDataNode(sc)){
+                curr.deleteData(so, sc.deleteData);
+            } else {
+
+            }
+        }
+        if(ec === curr){
+            if(isCharacterDataNode(ec)){
+                curr.deleteData(ec, eo);
+            } else {
+
+            }
+        }
+        if(['TABLE', 'TR', 'TH', 'TD'].indexOf(curr.nodeName) > -1) {
+            continue;
+        }
+
+        removeNode(curr);
+        if(curr === ec) {
+            break;
+        }
+    }
     //1. 시작노드 부터 root 까지 삭제
-    while(curr = next) {
-        p = curr;
-        while( p.parentNode != cc && !(next = p.nextSibling) ){
-            p = p.parentNode;
-        }
-
-        if(curr === sc && isCharacterDataNode(curr)){
-            curr.deleteData(so, curr.length);
-        } else {
-            if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
-                removeChildNodeAll(curr);
-            } else {
-                removeNode(curr)
-            }
-        }
-    }
-
-    //2. p부터 ec가 포함되지 않은 노드 탐색
-    next = p;
-    while(curr = next){
-        next = curr.nextSibling;
-        if(next.contains(ec)){ break; }
-        if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
-            removeChildNodeAll(curr);
-        } else {
-            removeNode(curr)
-        }
-    }
-
-    //3.
-    next = ec, p;
-    while(curr = next) {
-        p = curr;
-        while( p.parentNode != cc && !(next = p.previousSibling) ){
-            p = p.parentNode;
-        }
-
-        if(curr === sc && isCharacterDataNode(curr)){
-            curr.deleteData(eo, curr.length);
-        } else {
-            if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
-                removeChildNodeAll(curr);
-            } else {
-                removeNode(curr)
-            }
-        }
-    }
+    // while(curr = next) {
+    //     p = curr;
+    //     while( p.parentNode != cc && !(next = p.nextSibling) ){
+    //         p = p.parentNode;
+    //     }
+    //
+    //     if(curr === sc && isCharacterDataNode(curr)){
+    //         curr.deleteData(so, curr.length);
+    //     } else {
+    //         if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
+    //             removeChildNodeAll(curr);
+    //         } else {
+    //             removeNode(curr)
+    //         }
+    //     }
+    // }
+    //
+    //
+    // //2. p부터 ec가 포함되지 않은 노드 탐색
+    // next = p;
+    // while(curr = next){
+    //     next = curr.nextSibling;
+    //     if(next.contains(ec)){ break; }
+    //     if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
+    //         removeChildNodeAll(curr);
+    //     } else {
+    //         removeNode(curr)
+    //     }
+    // }
+    //
+    // //3.
+    // next = ec, p;
+    // while(curr = next) {
+    //     p = curr;
+    //     while( p.parentNode != cc && !(next = p.previousSibling) ){
+    //         p = p.parentNode;
+    //     }
+    //
+    //     if(curr === sc && isCharacterDataNode(curr)){
+    //         curr.deleteData(eo, curr.length);
+    //     } else {
+    //         if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
+    //             removeChildNodeAll(curr);
+    //         } else {
+    //             removeNode(curr)
+    //         }
+    //     }
+    // }
 }
 
 window.deleteContents = deleteContents;
