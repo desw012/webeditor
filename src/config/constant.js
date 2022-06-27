@@ -7,7 +7,7 @@ export const BLOCK_TAGS = [
 ];
 
 /**
- * w3c
+ *
  */
 export const BLOCK_TAG_NAME = [
     'ADDRESS', 'ARTICLE', 'ASIDE', 'BLOCKQUOTE', 'CAPTION',

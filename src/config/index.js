@@ -1,5 +1,3 @@
-import { TOOLBAR_SEPARATOR } from "./constant";
-
 const config = {
     locale : 'en',
     id : undefined,
