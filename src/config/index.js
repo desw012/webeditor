@@ -13,8 +13,8 @@ const config = {
         'InsertImage',
         'UITableWidget', 'UIResizeWidget',
         'OrderedList', 'UnorderedList',
-        'Content', 'Symbol'
-        //'Migration'
+        'Content', 'Symbol',
+        'Migration'
     ],
     toolbarItems : [
         'FontName',

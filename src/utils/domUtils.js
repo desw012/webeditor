@@ -1,4 +1,10 @@
-import {BLOCK_CANDIDATE_NODE, BLOCK_NODE, INLINE_NODE_STYLE_DISPLAY, NOT_SPLIT_NODE} from "../config/constant";
+import {
+    BLOCK_CANDIDATE_NODE,
+    BLOCK_NODE,
+    INLINE_NODE_STYLE_DISPLAY,
+    NOT_SPLIT_NODE,
+    TABLE_NODE
+} from "../config/constant";
 
 export const isCharacterDataNode = node => {
     const t = node.nodeType;
@@ -363,40 +369,33 @@ export const getBlockNodes = (range) => {
 
 export const getTextNodes = (range) => {
     const cc = range.commonAncestorContainer;
-    const sc = range.startContainer;
-    const so = range.startOffset;
-    const ec = range.endContainer;
-    const eo = range.endOffset;
+    let sc = range.startContainer;
+    let so = range.startOffset;
+    let ec = range.endContainer;
+    let eo = range.endOffset;
+
+    const startNode = isCharacterDataNode(sc) ? sc : sc.childNodes[so];
+    const endNode = isCharacterDataNode(ec) ? ec : ec.childNodes[eo];
 
     const textNodes = new Array();
-
-    const startNode = isCharacterDataNode(sc) ? sc :  sc.childNodes[so];
-    const endNode = isCharacterDataNode(ec) ? ec :  ec.childNodes[eo];
-    if(startNode === endNode && isCharacterDataNode(startNode)){
-        textNodes.push(startNode);
-    } else {
-        const iterator = document.createNodeIterator(range.commonAncestorContainer
-            , NodeFilter.SHOW_ALL
-            , (node)=>{ return NodeFilter.FILTER_ACCEPT; });
-
-        let node, find = false;
-
-        while(node = iterator.nextNode()){
-            if(node === startNode) { find = true; }
-            if(node === endNode) { break; }
-            if(!find) continue;
-
-            if(isCharacterDataNode(node)) {
-                textNodes.push(node);
-            }
-
-            if(!endNode && ec === node.parentNode && ec.childNodes.length - 1 === getNodeOffset(node)) {
-                break;
+    let curr, next = startNode;
+    while(curr = next){
+        next = curr.firstChild;
+        if(!next) { next = curr.nextSibling; }
+        if(!next) {
+            let p = curr.parentNode;
+            while(p && p !== cc && !(next = p.nextSibling)){
+                p = p.parentNode;
             }
         }
+        if(isCharacterDataNode(curr)) {
+            if(curr.data.trim() !== '') textNodes.push(curr);
+        }
 
+        if(curr === endNode || (!endNode && ec === curr.parentNode && !curr.nextSibling)){
+            break;
+        }
     }
-
     return textNodes;
 }
 
@@ -558,12 +557,7 @@ export const removeNode = (node) => {
     node.parentNode.removeChild(node);
 }
 
-export const removeChildNodeAll = (node) => {
-    let t;
-    while(t = node.firstChild){
-        node.removeChild(t);
-    }
-}
+
 
 export const removeNodeAndMoveToParent = (node) => {
     let curr;
@@ -577,7 +571,7 @@ export const removeNodeAndMoveToParent = (node) => {
  * 노드의 이름을 변경.
  * algorithm https://w3c.github.io/editing/docs/execCommand/#common-algorithms
  */
-export const renameTagName = (node, nodeName) => {
+export const renameTag = (node, nodeName) => {
     if(node.tagName === nodeName.toUpperCase()) return node;
     if(!node.parentNode) return node;
 
@@ -608,9 +602,42 @@ export const removeStyleProperty = (node, property) => {
     }
 }
 
+export const removeChildNodeAll = (node) => {
+    let t;
+    while(t = node.firstChild){
+        node.removeChild(t);
+    }
+}
+
+export const removeChild = (p, so, eo) => {
+    let curr, next = p.childNodes[so], end = p.childNodes[eo];
+    while(curr = next){
+        next = curr.nextSibling;
+        if(curr === end) break;
+
+        p.removeChild(curr);
+    }
+}
+
 //==================================================
 // Range Utils
 //==================================================
+/**
+ * @deprecated Table Node와 본문은 같이 selection 불가하도록 수정
+ *
+ * Range 범위에 해당 되는 노드는 제거한다.
+ * Table 관련 노드는 유지.
+ * Process
+ * 1. collapsed 인 경우 range를 리턴한다.
+ * 2. TextNode 인경우. range.deleteContents() 수행
+ * 3. Table 노드를 함하지 않은 경우. range.deleteContents() 수행
+ * 4. commonAncestorContainer로 부터 전체 Loop
+ * 4.1. 현재 노드가 startContainer와 같으면 이후 노드는 삭제
+ * 4.2. 현재 노드가 endContainer와 같으면 이전 노드는 삭제
+ * 4.3. 현재 노드에 startContainer 또는 endContainer를 포함한 경우 skip
+ * 4.4. 테이블 노드가 아닌 테이블 관련 노드인 경우 Skip
+ * 4.5. 그 외에 삭제한다.
+ */
 export const deleteContents = (range) => {
     const cc = range.commonAncestorContainer;
     const sc = range.startContainer;
@@ -618,15 +645,17 @@ export const deleteContents = (range) => {
     const ec = range.endContainer;
     const eo = range.endOffset;
 
-    if(sc === ec && isCharacterDataNode(cc)){
-        cc.deleteData(so, eo);
-        const _range = new Range()
-        _range.setStart(cc, so);
-        _range.setEnd(cc, so);
-        return _range;
+    if(range.collapsed){
+        return range;
     }
-
-    //let curr, next = sc, p;
+    if(isCharacterDataNode(cc)){
+        range.deleteContents();
+        return range;
+    }
+    if(cc.querySelectorAll('table, tr, th, td').length === 0){
+        range.deleteContents();
+        return range;
+    }
 
     const iterator = document.createNodeIterator(
         cc
@@ -634,101 +663,45 @@ export const deleteContents = (range) => {
         , (node) => {
             return NodeFilter.FILTER_ACCEPT;
         });
+
     let curr, find = false;
-
-
 
     while(curr = iterator.nextNode()){
         if(curr === sc) { find = true; }
         if(!find) continue;
-        if(curr.contains(sc)) {
-            if(curr === sc){
-                curr.deleteData(so, curr.length)
+
+        if(curr === sc){
+            if(isCharacterDataNode(curr)){
+                curr.deleteData(so, curr.length);
             } else {
-                continue
+                removeChild(curr, so, curr.childNodes.length);
             }
-        }
-
-        if (curr.contains(ec)) {
-            if(curr === ec) {
-                curr.deleteData(0, curr)
+        } else if(curr === ec){
+            if(isCharacterDataNode(curr)){
+                curr.deleteData(0, eo);
             } else {
-                continue
+                removeChild(curr, 0, eo);
             }
-        }
+        } else if(curr.contains(sc) || curr.contains(ec) ){
+            //skip
+        } else if('TABLE' !== curr.nodeName && TABLE_NODE.indexOf(curr.nodeName) > -1){
 
-        if(sc === curr){
-            if(isCharacterDataNode(sc)){
-                curr.deleteData(so, sc.deleteData);
-            } else {
-
+        } else {
+            if(!curr.nextSibling
+                && ['TD', 'TH'].indexOf(curr.parentNode.nodeName)
+                && curr.parentNode.childNodes.length === 1){
+                const blockNode = createBlockNode();
+                curr.parentNode.insertBefore(blockNode, curr);
             }
-        }
-        if(ec === curr){
-            if(isCharacterDataNode(ec)){
-                curr.deleteData(ec, eo);
-            } else {
 
-            }
-        }
-        if(['TABLE', 'TR', 'TH', 'TD'].indexOf(curr.nodeName) > -1) {
-            continue;
+            removeNode(curr);
         }
 
-        removeNode(curr);
-        if(curr === ec) {
-            break;
-        }
+        if( curr == ec ) { break; }
     }
-    //1. 시작노드 부터 root 까지 삭제
-    // while(curr = next) {
-    //     p = curr;
-    //     while( p.parentNode != cc && !(next = p.nextSibling) ){
-    //         p = p.parentNode;
-    //     }
-    //
-    //     if(curr === sc && isCharacterDataNode(curr)){
-    //         curr.deleteData(so, curr.length);
-    //     } else {
-    //         if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
-    //             removeChildNodeAll(curr);
-    //         } else {
-    //             removeNode(curr)
-    //         }
-    //     }
-    // }
-    //
-    //
-    // //2. p부터 ec가 포함되지 않은 노드 탐색
-    // next = p;
-    // while(curr = next){
-    //     next = curr.nextSibling;
-    //     if(next.contains(ec)){ break; }
-    //     if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
-    //         removeChildNodeAll(curr);
-    //     } else {
-    //         removeNode(curr)
-    //     }
-    // }
-    //
-    // //3.
-    // next = ec, p;
-    // while(curr = next) {
-    //     p = curr;
-    //     while( p.parentNode != cc && !(next = p.previousSibling) ){
-    //         p = p.parentNode;
-    //     }
-    //
-    //     if(curr === sc && isCharacterDataNode(curr)){
-    //         curr.deleteData(eo, curr.length);
-    //     } else {
-    //         if(['TR', 'TH', 'TD'].indexOf(curr.tagName) > -1) {
-    //             removeChildNodeAll(curr);
-    //         } else {
-    //             removeNode(curr)
-    //         }
-    //     }
-    // }
-}
 
-window.deleteContents = deleteContents;
+    const _range = new Range()
+    _range.setStart(sc, so);
+    _range.setEnd(sc, so);
+    return _range;
+}
