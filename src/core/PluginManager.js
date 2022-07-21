@@ -43,7 +43,7 @@ export default class PluginManager {
         for( const pluginName of pluginNames){
             const constructor =  plugins[pluginName];
             if(!constructor){
-                console.log('NOT FOUND PLUGIN : ' + pluginName)
+                console.log(`NOT FOUND PLUGIN : ${pluginName}`)
                 continue;
             }
 
@@ -56,7 +56,7 @@ export default class PluginManager {
         }
 
         for(const [key, value] of this.waitingPlugins){
-            console.error('require plugin :' + key + ', fail plugin: ' + value.join(', '));
+            console.error(`require plugin : ${key}, fail plugin: ' + ${value.join(', ')}`);
         }
     }
 

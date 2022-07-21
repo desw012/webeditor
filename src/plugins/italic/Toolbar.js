@@ -3,6 +3,7 @@ import {Commands} from "../../core/Command";
 export default class Toolbar {
     constructor(plugin) {
         this.plugin = plugin;
+        this.execCommand = plugin.context.execCommand;
         this.build();
     }
 

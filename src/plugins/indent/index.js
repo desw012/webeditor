@@ -1,10 +1,10 @@
 import Plugin from "../../core/Plugin";
-import {
-    getBlockNodes, getCommonAncestor,
+import {getSiblingBlockNodes, isBlockNode} from "../../utils/domUtils";
 
-} from "../../utils/domUtils";
-import Toolbar from "./Toolbar";
-import {Commands} from "../../core/Command";
+import { Commands } from "../../core/Command";
+import indent from "./actions/indent";
+import {ToolbarItem} from "../../components/toolbar";
+import {t} from "i18next";
 
 export default class Indent extends Plugin {
     get pluginName() {
@@ -20,41 +20,69 @@ export default class Indent extends Plugin {
         this.selection = this.pm.get('Selection');
         this.undo = this.pm.get('Undo');
 
-        this.command.on(Commands.indent, this.indent);
-        this.command.on(Commands.outdent, this.indent);
+        this.command.on(Commands.indent, ()=>{ this.action(Commands.indent); });
+        this.command.on(Commands.outdent, ()=>{ this.action(Commands.outdent); });
     }
 
-    indent = async () => {
+    action = ( actionType ) => {
         let range = this.selection.getCurrentRange();
         if(!range) return;
 
         this.undo.flush();
-        const blockNodes = getBlockNodes(range);
-        const commandAncestor = getCommonAncestor(blockNodes);
+        const blockNodes = getSiblingBlockNodes(range);
 
-        //선택된 Block Node들이 공통한 blockquote에 포함된 경우.
-        // if(commandAncestor.tagName === 'BLOCKQUOTE'){
-        //     const childNode = commandAncestor.childNodes;
-        //     let startPos = -1, cnt = 0;
-        //     for(let i = 0; i < childNode.length; i++){
-        //         if(blockNodes.indexOf(childNode[i]) > -1){
-        //             if(startPos === -1) startPos = i;
-        //             cnt++;
-        //         }
-        //     }
-        //     const splitNode = splitChildNode(commandAncestor, startPos, cnt);
-        //     let node;
-        //     while( node = splitNode.firstChild) {
-        //         insertBefore(node, splitNode);
-        //     }
-        // }
+        const _blockNodes = new Array();
+        const {
+            commonAncestorContainer : cc,
+            startContainer : sc,
+            startOffset : so,
+            endContainer : ec,
+            endOffset : eo
+        } = range;
+
+        for(let i = 0; i < blockNodes.length; i++){
+            const node = blockNodes[i];
+            if(['OL', 'UL'].indexOf(node.tagName) > -1){
+                let curr, next = node.firstChild, find = false;
+                while(curr = next){
+                    next = curr.nextSibling;
+                    if(!isBlockNode(curr)) continue;
+                    if(curr.contains(sc)){ find = true; }
+                    if(find){ _blockNodes.push(curr); }
+                    if(curr.contains(ec)){ break; }
+                }
+            } else {
+                _blockNodes.push(node);
+            }
+        }
+
+        _blockNodes.forEach((node)=>{
+            indent(node, actionType);
+        })
     }
 
     getToolbarItems () {
-        if(!this.toolbar){
-            this.toolbar = new Toolbar(this);
-        }
+        const onclick = async (e) => {
+            const value = e.currentTarget.value;
 
-        return this.toolbar.getItems();
+            await this.execCommand(value);
+            this.execCommand(Commands.focus);
+        };
+
+        const { root : indent } = ToolbarItem.build({
+            title : t('toolbar.indent'),
+            value : Commands.indent,
+            imageClassName : 'img_toolbar_indent',
+            onclick : onclick
+        });
+
+        const { root : outdent } = ToolbarItem.build({
+            title : t('toolbar.outdent'),
+            value : Commands.outdent,
+            imageClassName : 'img_toolbar_outdent',
+            onclick : onclick
+        });
+
+        return [ indent, outdent ];
     }
 }

@@ -237,10 +237,15 @@ export const removeWrapNode = ( node ) => {
     node.parentNode.removeChild(node);
 }
 
-export const createBlockNode = () => {
-    const p = document.createElement('p');
-    p.style.margin = '0px';
-    p.style.lineHeight = '1.5'
+export const createBlockNode = (node) => {
+    let p;
+    if(node) {
+        p = node.cloneNode(false);
+    } else {
+        p = document.createElement('p');
+        p.style.margin = '0px';
+        p.style.lineHeight = '1.5'
+    }
 
     const br = document.createElement('br');
     p.appendChild(br);
@@ -316,6 +321,18 @@ export const getParentNodeByNodeName = (node, nodeNames) => {
     return curr;
 }
 
+export const getNextElementSibling = (node, selector) => {
+    let curr, next = node.nextElementSibling;
+    while(curr = next){
+        next = node.nextElementSibling;
+
+        if(curr.matches(selector)){
+            break
+        }
+    }
+    return curr;
+}
+
 //==================================================
 // Node 탐색 functions
 //==================================================
@@ -336,31 +353,67 @@ export const getNodeOffset = (node) => {
  * 해당 Range에 포함된 Block Node List를 리턴한다.
  */
 export const getBlockNodes = (range) => {
+    const {
+        commonAncestorContainer : cc,
+        startContainer : sc,
+        startOffset : so,
+        endContainer : ec,
+        endOffset : eo
+    } = range;
+
     const blockNodes = new Array();
 
-    const startBlockNode = getBlockNode(range.startContainer);
-    const endBlockNode = getBlockNode(range.endContainer);
+    const scBlockNode = getBlockNode(sc);
+    const ccBlockNode = getBlockNode(cc);
+    const ecBlockNode = getBlockNode(ec);
 
-    if(startBlockNode === endBlockNode){
-        blockNodes.push(startBlockNode);
+    if(ccBlockNode === scBlockNode){
+        blockNodes.push(scBlockNode);
     } else {
-        const commonAncestor = getCommonAncestor([startBlockNode, endBlockNode]);
-        const iterator = document.createNodeIterator( commonAncestor
-            , NodeFilter.SHOW_ELEMENT
-            , (node) => {
-                return NodeFilter.FILTER_ACCEPT;
-            });
+        const p = cc.closest('body, td, th');
+        const nodes = p.querySelectorAll('*');
 
-        let node, find = false;
-        while(node = iterator.nextNode()){
-            if(node === startBlockNode) { find = true; }
-            if(!find) continue;
+        let find = false;
+        for(const curr of nodes){
+            if(!isBlockNode(curr)) continue;
+            if(curr === scBlockNode){ find = true; }
+            if(find){ blockNodes.push(curr); }
+            if(curr === ecBlockNode){ break; }
+        }
+    }
 
-            if( isBlockNode(node) ) {
-                blockNodes.push(node);
-            }
+    return blockNodes;
+}
 
-            if(node === endBlockNode) { break; }
+/**
+ * range를 포함한 같은 레벨의 블럭 노드만 리턴한다.
+ */
+export const getSiblingBlockNodes = ( range ) => {
+    const {
+        commonAncestorContainer : cc,
+        startContainer : sc,
+        startOffset : so,
+        endContainer : ec,
+        endOffset : eo
+    } = range;
+
+    const blockNodes = new Array();
+
+    const scBlockNode = getBlockNode(sc);
+    const ccBlockNode = getBlockNode(cc);
+
+    if(ccBlockNode === scBlockNode){
+        blockNodes.push(scBlockNode);
+    } else {
+        const p = cc.closest('body, td, th');
+
+        let curr, next = p.firstChild, find = false;
+        while(curr = next){
+            next = curr.nextSibling;
+            if(!isBlockNode(curr)) continue;
+            if(curr.contains(sc)){ find = true; }
+            if(find){ blockNodes.push(curr); }
+            if(curr.contains(ec)){ break; }
         }
     }
 
@@ -441,12 +494,10 @@ export const splitNode = (node, offset) => {
             return [node, _node];
         }
     } else {
-        if( offset === 0 ){
-            return [undefined, node];
-        } else if( offset === node.childNodes.length ) {
+        if( offset >= node.childNodes.length ) {
             return [node, undefined];
         } else {
-            const child = node.childNodes[offset];
+            const child = node.childNodes[offset + 1];
             const _node = node.cloneNode(false);
             insertAfter(_node, node);
 
@@ -557,14 +608,18 @@ export const removeNode = (node) => {
     node.parentNode.removeChild(node);
 }
 
-
-
 export const removeNodeAndMoveToParent = (node) => {
     let curr;
     while(curr = node.firstChild){
         insertBefore(curr, node);
     }
     node.parentNode.removeChild(node);
+}
+export const wrap = (node, wrapNodeName) => {
+    const wrap = document.createElement(wrapNodeName);
+    insertBefore(wrap, node);
+    wrap.appendChild(node);
+    return wrap;
 }
 
 /**
@@ -617,6 +672,27 @@ export const removeChild = (p, so, eo) => {
 
         p.removeChild(curr);
     }
+}
+
+export const scrollParent = (node) => {
+    const regex = /(auto|scroll)/;
+    let curr, next = node;
+    while(curr = next){
+        if(!(curr instanceof HTMLElement)){ return undefined }
+
+        next = curr.parentNode;
+
+        if(regex.test(getComputedStyle(curr).overflow)){
+            return curr;
+        }
+        if(regex.test(getComputedStyle(curr).overflowY)){
+            return curr;
+        }
+        if(regex.test(getComputedStyle(curr).overflowX)){
+            return curr;
+        }
+    }
+    return curr;
 }
 
 //==================================================
@@ -704,4 +780,115 @@ export const deleteContents = (range) => {
     _range.setStart(sc, so);
     _range.setEnd(sc, so);
     return _range;
+}
+
+//==================================================
+// Table Utils
+//==================================================
+export const calcTableMatrix = (table) => {
+    const matrix = new Array();
+    for(let row = 0 ; row < table.rows.length; row++){
+        matrix[row] = new Array();
+    }
+
+    for(let row = 0 ; row < table.rows.length; row++){
+        for(let col = 0; col < table.rows[row].cells.length; col++){
+            const node = table.rows[row].cells[col];
+            const rowSpan = node.rowSpan;
+            const colSpan = node.colSpan;
+
+            let _row = row;
+            let _col = col;
+
+            if(matrix[_row][_col]){
+                while(matrix[_row][++_col]){ }
+            }
+
+            const info = {
+                node : node,
+                row : _row,
+                cell : _col,
+                col : _col,
+                rowSpan : rowSpan,
+                colSpan : colSpan
+            }
+
+            for( let i = 0; i < rowSpan; i++){
+                for(let j = 0; j < colSpan; j++){
+                    if(!matrix[_row+i][_col+j]) matrix[_row+i][_col+j] = info;
+                }
+            }
+        }
+    }
+
+    matrix.getRowIndex = function(node) {
+        return node.parentNode.rowIndex;
+    }
+    matrix.getColIndex = function(node) {
+        for( const info of this[this.getRowIndex(node)]){
+            if(info.node === node){
+                return info.cell;
+            }
+        }
+    }
+    matrix.getPosition = function(nodes) {
+        let sRowIdx = matrix.length;
+        let eRowIdx = -1;
+        let sColIdx = matrix[0].length;
+        let eColIdx = -1;
+
+        for(const node of nodes){
+            const cellInfo = this[this.getRowIndex(node)][this.getColIndex(node)];
+            sRowIdx = Math.min(sRowIdx, cellInfo.row);
+            eRowIdx = Math.max(eRowIdx, cellInfo.row + cellInfo.rowSpan - 1);
+            sColIdx = Math.min(sColIdx, cellInfo.col);
+            eColIdx = Math.max(eColIdx, cellInfo.col + cellInfo.colSpan - 1);
+        }
+
+        return {
+            sRowIdx: sRowIdx,
+            eRowIdx: eRowIdx,
+            sColIdx: sColIdx,
+            eColIdx: eColIdx
+        }
+    }
+
+    return matrix;
+}
+
+export const calcTableSize = (table) => {
+    const iterator = document.createNodeIterator(table
+        , NodeFilter.SHOW_ELEMENT
+        , node => {
+            if(['TABLE', 'TD', 'TH'].indexOf(node.nodeName) > -1) return NodeFilter.FILTER_ACCEPT;
+            else if(['TD', 'TH'].indexOf(node.parentNode.nodeName) > -1) return NodeFilter.FILTER_REJECT;
+            else return NodeFilter.FILTER_SKIP;
+        });
+
+    let node;
+    while(node = iterator.nextNode()){
+        const rect = node.getBoundingClientRect()
+        node.style.width = `${rect.width}px`;
+        node.style.height = `${rect.height}px`;
+        node.style.boxSizing = 'border-box';
+    }
+}
+
+//==================================================
+// Style Utils
+//==================================================
+export const getTextAlign = (node) => {
+    const textAlign = getComputedStyle(node).textAlign;
+    switch (textAlign){
+        case 'start':
+        case 'left':
+            return 'left';
+        case 'center':
+            return 'center';
+        case 'end':
+        case 'right':
+            return 'right';
+        default:
+            return '';
+    }
 }

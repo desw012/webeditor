@@ -2,19 +2,22 @@ const config = {
     locale : 'en',
     id : undefined,
     root : undefined,
-    DEFAULT_FONT : '10pt 맑은 고딕',
-    LINE_HEIGHT : '1.5',
+    url : '',
+    DEFAULT_FONTNAME : '맑은 고딕',
+    DEFAULT_FONTSIZE : '10pt',
+    DEFAULT_LINEHEIGHT : '1.5',
     plugins : [ 
         'UI', 'Selection', 'Undo', 'Shortcut', 'Enter',
         'FontName', 'FontSize', 'Bold', 'Italic', 'UnderLine',
         'FontColor', 'FontBackgroundColor',
         'Align', 'Outdent', 'Indent', 'LineHeight',
         'InsertText', 'InsertHorizontalRule', 'InsertTable', 'InsertLink',
-        'InsertImage',
-        'UITableWidget', 'UIResizeWidget',
+        'InsertImage', 'InsertHtml',
+        'UIResizeWidget',
         'OrderedList', 'UnorderedList',
         'Content', 'Symbol',
-        'Migration'
+        'Migration',
+        'EditTable', 'ContextMenu'
     ],
     toolbarItems : [
         'FontName',
@@ -46,7 +49,7 @@ export const defaultContent2 =
     `<html>
     <head>
     </head>
-    <body style="margin:5px; font:${config.DEFAULT_FONT}"; line-height:${config.LINE_HEIGHT}">
+    <body style="margin:5px; font:${config.DEFAULT_FONTSIZE} ${config.DEFAULT_FONTNAME}"; line-height:${config.DEFAULT_LINEHEIGHT}">
         <p style='margin: 0px;line-height:1.5;'><br/></p>
     </body>
 </html>`;
@@ -55,10 +58,16 @@ export const defaultContent =
     `<html>
     <head>
     </head>
-    <body style="margin:5px; font:${config.DEFAULT_FONT}"; line-height:${config.LINE_HEIGHT}">
+    <body style="margin:5px; font:${config.DEFAULT_FONTSIZE} ${config.DEFAULT_FONTNAME}"; line-height:${config.DEFAULT_LINEHEIGHT}">
 <p>Rangy Text Commands Module Demo</p>
 
 <!-- A comment -->
+<table>
+<tbody>
+<tr><td style="border: solid 1px black; width: 100px"><p></br></p></td><td style="border: solid 1px black; width: 100px"><p></br></p></td></tr>
+<tr><td style="border: solid 1px black; width: 100px"><p></br></p></td><td style="border: solid 1px black; width: 100px"><p></br></p></td></tr>
+</tbody>
+</table>
 <p id="intro">Please use your mouse and/or keyboard to make selections from the sample content below and use the buttons on
     the left hand size to toggle CSS classes applied to text content within the selection.</p>
 
@@ -80,7 +89,6 @@ export const defaultContent =
     in the English leagues and in the English FA Cup.
 </p>
 <h2>Who plays football <span className="smaller">(this section is editable and in pre-formatted text)</span></h2>
-<table style="width: 743px; height: 155px;"> <tbody> <tr style="height: 20.915%;"> <td style="width: 24.4265%;    border: solid;" colspan="2"><strong>Next</strong><strong> Q Marketing Budget</strong></td> <td style="width: 24.1565%;     border: solid;" colspan="2"><strong>January</strong> </td> <td style="width: 16.4642%; " colspan="2"><strong>February</strong> </td> <td style="width: 23.8866%; " colspan="2"><strong>March</strong></td> </tr> <tr style="height: 20.915%;"> <td style="width: 12.4157%;" rowspan="5"><strong>Campaign</strong></td> <td style="width: 12.0108%;">﻿</td> <td style="width: 12.1457%; ">Planned</td> <td style="width: 12.0108%; ">Actual</td> <td style="width: 16.4642%; ">Planned</td> <td style="width: 11.0661%; ">Actual</td> <td style="width: 12.1457%; ">Planned</td> <td style="width: 11.7409%; ">Actual</td> </tr> <tr style="height: 15.0327%;"> <td style="width: 12.0108%; ">Social Media</td> <td style="width: 12.1457%; ">2000</td> <td style="width: 12.0108%; ">1850</td> <td style="width: 16.4642%; "><span style="">2000</span></td> <td style="width: 11.0661%; "><span style="">2000</span></td> <td style="width: 12.1457%; "><span style="">2000</span></td> <td style="width: 11.7409%; "><span style="">2000</span></td> </tr> <tr style="height: 14.3791%;"> <td style="width: 12.0108%; ">TV Ads</td> <td style="width: 12.1457%; ">40 000</td> <td style="width: 12.0108%; ">55 000</td> <td style="width: 16.4642%; "><span style="">40 000</span></td> <td style="width: 11.0661%; ">40 000</td> <td style="width: 12.1457%; "><span style="">-</span></td> <td style="width: 11.7409%; ">-</td> </tr> <tr style="height: 14.3791%;"> <td style="width: 12.0108%; ">Flyers</td> <td style="width: 12.1457%; ">550</td> <td style="width: 12.0108%; ">550</td> <td style="width: 16.4642%; ">-&nbsp;</td> <td style="width: 11.0661%; ">-</td> <td style="width: 12.1457%; ">-</td> <td style="width: 11.7409%; ">-</td> </tr> <tr style="height: 14.3791%;"> <td style="width: 12.0108%; ">Radio Ads</td> <td style="width: 12.1457%; ">15 000</td> <td style="width: 12.0108%; ">15 000</td> <td style="width: 16.4642%; ">10 000</td> <td style="width: 11.0661%; ">10 000</td> <td style="width: 12.1457%; ">5000</td> <td style="width: 11.7409%; ">5000</td> </tr> </tbody> </table>
 </body>
 </html>`;
 

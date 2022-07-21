@@ -1,4 +1,5 @@
 import { COMPONENT_CLASS } from "../constants";
+import { Separator } from "../../../components/toolbar";
 
 
 export default function ToolBar( uiPlugin ) {
@@ -14,24 +15,13 @@ export default function ToolBar( uiPlugin ) {
 
         for(const toolbarName of toolbarItems){
             if(toolbarName === 'SEPARATOR'){
-                const el_li = document.createElement('li');
-                itemGroup.appendChild(el_li);
-
-                const button = document.createElement("button");
-                el_li.appendChild(button);
-                button.className = 'toolbar-item';
-                button.type = 'button';
-                button.disabled = true;
-                button.title = 'SEPARATOR';
-
-                const span = document.createElement("span");
-                button.appendChild(span);
-                span.innerText = '|';
+                const { root } = Separator.build();
+                itemGroup.appendChild(root);
             }
 
             const plugin = uiPlugin.pm.get(toolbarName);
             if(plugin){
-                const items = plugin.getToolbarItems();
+                const items = plugin.getToolbarItems() || [];
                 items.forEach( item => {
                     if(!item) return;
 

@@ -1,0 +1,38 @@
+
+
+.XClickEditor .img_cell_border_outside { width:15px; height: 15px; background:url(../img/cell-borders.png) 0 0 no-repeat; }
+.XClickEditor .img_cell_border_outside[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_inside { width:15px; height: 15px; background:url(../img/cell-borders.png) -15px 0 no-repeat; }
+.XClickEditor .img_cell_border_inside[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_all { width:15px; height: 15px; background:url(../img/cell-borders.png) -30px 0 no-repeat; }
+.XClickEditor .img_cell_border_all[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_left { width:15px; height: 15px; background:url(../img/cell-borders.png) -45px 0 no-repeat; }
+.XClickEditor .img_cell_border_left[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_center_vertical { width:15px; height: 15px; background:url(../img/cell-borders.png) -60px 0 no-repeat; }
+.XClickEditor .img_cell_border_center_vertical[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_right { width:15px; height: 15px; background:url(../img/cell-borders.png) -75px 0 no-repeat; }
+.XClickEditor .img_cell_border_right[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_top { width:15px; height: 15px; background:url(../img/cell-borders.png) -90px 0 no-repeat; }
+.XClickEditor .img_cell_border_top[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_center_horizontal { width:15px; height: 15px; background:url(../img/cell-borders.png) -105px 0 no-repeat; }
+.XClickEditor .img_cell_border_center_horizontal[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_bottom { width:15px; height: 15px; background:url(../img/cell-borders.png) -120px 0 no-repeat; }
+.XClickEditor .img_cell_border_bottom[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_outside1 { width:15px; height: 15px; background:url(../img/cell-borders.png) -135px 0 no-repeat; }
+.XClickEditor .img_cell_border_outside1[disabled] { background-position-y: -15px; }
+.XClickEditor .img_cell_border_none { width:15px; height: 15px; background:url(../img/cell-borders.png) -150px 0 no-repeat; }
+.XClickEditor .img_cell_border_none[disabled] { background-position-y: -15px; }
+
+.XClickEditor .img_toolbar_bold { width:18px; height: 18px; background:url(../img/icons.png) -0px -90px no-repeat; }
+.XClickEditor .img_toolbar_font-color { width:18px; height: 18px; background:url(../img/icons.png) -0px -612px no-repeat; }
+.XClickEditor .img_toolbar_font-background-color { width:18px; height: 18px; background:url(../img/icons.png) -0px -594px no-repeat; }
+.XClickEditor .img_toolbar_align_left { width:18px; height: 18px; background:url(../img/icons.png) -0px -990px no-repeat;}
+.XClickEditor .img_toolbar_align_center { width:18px; height: 18px; background:url(../img/icons.png) -0px -954px no-repeat;}
+.XClickEditor .img_toolbar_align_right { width:18px; height: 18px; background:url(../img/icons.png) -0px -1008px no-repeat;}
+.XClickEditor .img_toolbar_indent { width:18px; height: 18px; background:url(../img/icons.png) -0px -792px no-repeat;}
+.XClickEditor .img_toolbar_outdent { width:18px; height: 18px; background:url(../img/icons.png) -0px -1350px no-repeat;}
+.XClickEditor .img_toolbar_insert-horizontal-rule { width:18px; height: 18px; background:url(../img/icons.png) -0px -738px no-repeat;}
+.XClickEditor .img_toolbar_ordered-list { width:18px; height: 18px; background:url(../img/icons.png) -0px -1206px no-repeat;}
+.XClickEditor .img_toolbar_unordered-list { width:18px; height: 18px; background:url(../img/icons.png) -0px -1044px no-repeat;}
+.XClickEditor .img_toolbar_symbol { width:18px; height: 18px; background:url(../img/icons.png) -0px -1638px no-repeat;}
+.XClickEditor .img_toolbar_underline { width:18px; height: 18px; background:url(../img/icons.png) -0px -2034px no-repeat;}

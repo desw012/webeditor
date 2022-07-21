@@ -1,14 +1,16 @@
 import Plugin from "../../core/Plugin";
-import Toolbar from "./Toolbar";
 
 import {
-    getBlockNode, getNodePath,
-    getTextNodes, insertBefore,
-    isCharacterDataNode, removeNode, removeStyleProperty, removeWrapNode, renameTag,
-    splitNode, splitNodeToTarget,
-    splitTextNode
+    getTextNodes,
+    removeNode,
+    splitNode
 } from "../../utils/domUtils";
 import {Commands} from "../../core/Command";
+import {ToolbarItem} from "../../components/toolbar";
+import {t} from "i18next";
+import {isAppliedToElement} from "./utils";
+import unBold from "./actions/unbold";
+import bold from "./actions/bold";
 
 
 export default class Bold extends Plugin {
@@ -42,15 +44,13 @@ export default class Bold extends Plugin {
 
             const isApplied = isAppliedToElement(textNode);
             if(isApplied){
-                const rtn = this.unBold(textNode);
+                const rtn = unBold(textNode);
                 !rtn && removeNode(textNode);
 
-                this.toolbar && (this.toolbar.active = false);
                 rtn && this.selection.collapse(textNode, 1);
             } else {
-                const rtn = this.bold(textNode);
+                const rtn = bold(textNode);
 
-                this.toolbar && (this.toolbar.active = true);
                 rtn && this.selection.collapse(textNode, 1);
             }
         } else {
@@ -80,7 +80,7 @@ export default class Bold extends Plugin {
                         ec = target;
                         eo = target.length
                     }
-                    if(target) this.unBold(target);
+                    if(target) unBold(target);
                 });
             } else {
                 NOTAppliedNodes.forEach((target)=>{
@@ -96,7 +96,7 @@ export default class Bold extends Plugin {
                         ec = target;
                         eo = target.length
                     }
-                    if(target) this.bold(target);
+                    if(target) bold(target);
                 });
             }
 
@@ -105,55 +105,12 @@ export default class Bold extends Plugin {
             _range.setEnd(ec, eo);
             this.selection.removeAllRanges();
             this.selection.addRange(_range);
-
-            this.toolbar && (this.toolbar.active = !isApplied);
         }
 
-    }
-
-    unBold = ( textNode ) => {
-        const appliedNode = getAppliedNode(textNode);
-        if(!appliedNode) return false;
-
-        if(appliedNode.offsetWidth === 0) {
-            return false;
-        }
-
-        const _range = new Range();
-        _range.selectNodeContents(appliedNode);
-
-        const textNodes = getTextNodes(_range);
-        textNodes.forEach((node) => {
-            if (textNode === node) return;
-
-            const fontNode = document.createElement('b');
-
-            const _range = new Range();
-            _range.selectNode(node);
-            _range.surroundContents(fontNode);
-        });
-
-        removeStyleProperty(appliedNode, 'font-weight');
-        if (appliedNode.style.length === 0 && ['B', 'STRONG', 'SPAN', 'FONT'].indexOf(appliedNode.tagName) > -1) {
-            removeWrapNode(appliedNode);
-        } else {
-            renameTag(appliedNode, 'span');
-        }
-
-        return true;
-    }
-
-    bold = (textNode) => {
-        const fontNode = document.createElement('b');
-
-        const _range = new Range();
-        _range.selectNode(textNode);
-        _range.surroundContents(fontNode);
-        return true;
     }
 
     updateSelection = () => {
-        if(!this.toolbar) return;
+        if(!this.toolbarButton) return;
 
         let range = this.selection.getCurrentRange();
         if(!range) return;
@@ -166,50 +123,30 @@ export default class Bold extends Plugin {
             }));
         }
 
-        this.toolbar.active = isApplied;
-    }
-
-    getToolbarItems () {
-        if(!this.toolbar){
-            this.toolbar = new Toolbar(this);
-        }
-
-        return this.toolbar.getItems();
-    }
-}
-
-
-const isAppliedToElement = (el) => {
-    if(isCharacterDataNode(el)){
-        el = el.parentNode;
-    }
-    const fontWeight = getComputedStyle(el).fontWeight;
-    if(fontWeight === 'bold' || fontWeight === 'bolder'){
-        return true;
-    } else if(fontWeight === 'normal' || fontWeight === 'lighter'){
-        return false;
-    } else {
-        const weightNum = parseInt("" + fontWeight);
-        if(isNaN(weightNum)){ return false; }
-        return weightNum > 400 ? true : false;
-    }
-}
-
-const getAppliedNode = (el) => {
-    const blockNode = getBlockNode(el);
-
-    let curr, next = el;
-    while(curr = next){
-        next = curr.parentNode;
-        if(blockNode === curr) {
-            curr = undefined;
-            break;
-        }
-
-        if(!isAppliedToElement(next)){
-            break;
+        if(isApplied && !this.toolbarButton.classList.contains('active')){
+            this.toolbarButton.classList.add('active');
+        } else if(!isApplied && this.toolbarButton.classList.contains('active')){
+            this.toolbarButton.classList.remove('active');
         }
     }
 
-    return curr;
+    getToolbarItems = () => {
+        const onclick = async (e) => {
+            const value = e.currentTarget.value;
+
+            await this.execCommand(value);
+            this.execCommand(Commands.focus);
+        };
+
+        const { root, button } = ToolbarItem.build({
+            title : t('toolbar.bold'),
+            value : Commands.bold,
+            imageClassName : 'img_toolbar_bold',
+            onclick : onclick
+        });
+
+        this.toolbarButton = button;
+
+        return [root];
+    }
 }

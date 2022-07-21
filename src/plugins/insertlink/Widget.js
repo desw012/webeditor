@@ -2,7 +2,7 @@ import {getLinkNode, removeNode} from "../../utils/domUtils";
 import {Commands} from "../../core/Command";
 
 export default class Widget {
-    isShow = false;
+    isShow = true;
     linkNode = null;
 
     constructor( plugin ) {

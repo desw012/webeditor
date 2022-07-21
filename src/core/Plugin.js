@@ -5,6 +5,8 @@ export default class Plugin {
         this.context = context;
         this.pm = context.pm;
         this.command = context.command;
+        this.execCommand = context.execCommand;
+
         this._status = PLUGIN_STATUS.LOADING;
     }
 

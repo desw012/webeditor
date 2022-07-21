@@ -10,6 +10,7 @@ export default class Command {
     }
 
     emit = async (type, payload) => {
+        console.info(`command : ${type}`);
         this.command.emit(type, payload);
     }
 }

@@ -26,10 +26,10 @@ export const BLOCK_TAG_NAME = [
  * BLOCK 노드
  */
 export const BLOCK_NODE = [
-    'BODY',
+    /*'BODY', */
     'DIV', 'P', 'TABLE', 'PRE',
     'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-    'TH', 'TD'
+    'TH', 'TD', 'OL', 'UL', 'LI'
 ]
 
 /**
@@ -58,3 +58,4 @@ export const NOT_SPLIT_NODE = [
 ]
 
 export const TOOLBAR_SEPARATOR = 'SEPARATOR';
+

@@ -14,12 +14,12 @@ export default class Migration extends Plugin {
         this.ui = this.pm.get('UI');
         this.undo = this.pm.get('Undo');
 
-        this.migration();
+        this.migration(this.ui.document);
     }
 
-    migration = () => {
+    migration = (root) => {
         //b tag to strong;
-        // this.undo.stop();
+        this.undo.stop();
         // const bTagList = this.ui.document.getElementsByTagName('b');
         // for(let i = bTagList.length - 1; i >= 0; i--){
         //     const node = bTagList[i];
@@ -31,14 +31,14 @@ export default class Migration extends Plugin {
         //     node.parentElement.removeChild(node);
         // }
 
-        const tableList = this.ui.document.querySelectorAll('table');
-        for(const node of tableList){
-            node.contentEditable = 'false';
-        }
-        const tdList = this.ui.document.querySelectorAll('td, th');
-        for(const node of tdList){
-            node.contentEditable = 'true';
-        }
+        // const tableList = root.querySelectorAll('table');
+        // for(const node of tableList){
+        //     node.contentEditable = 'false';
+        // }
+        // const tdList = root.querySelectorAll('td, th');
+        // for(const node of tdList){
+        //     node.contentEditable = 'true';
+        // }
 
 
         this.undo.start();

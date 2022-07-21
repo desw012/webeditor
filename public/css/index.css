@@ -1,0 +1,296 @@
+html { font-size: 16px }
+
+.XClickEditor { position: relative; width: 100%; height: 100%; overflow: hidden; }
+.XClickEditor * { box-sizing : border-box; }
+.XClickEditor ul { list-style: none; margin : 0; padding : 0; }
+.XClickEditor fieldset { border: none; padding: 0; margin: 0;}
+.XClickEditor fieldset > ul { width: 100%; display: flex; flex-wrap: wrap; }
+.XClickEditor fieldset > ul > li  { display:flex; min-height: 2rem; align-items: center; width: 100%; }
+.XClickEditor fieldset > ul > li > label { width: 80px; text-align: right; margin-right: 10px; height: 1rem; }
+.XClickEditor fieldset > ul > li.w_50 > div { flex: 1; }
+.XClickEditor fieldset > ul > li.w_50 > div input,
+.XClickEditor fieldset > ul > li.w_50 > div select { width: 100%; }
+
+.XClickEditor input, .XClickEditor select { height: 1.5rem; }
+
+.XClickEditor .cur_p { cursor : pointer; }
+.XClickEditor .w_50 { width: 50% !important; }
+
+.XClickEditor button {
+	background: inherit;
+	border:none;
+	box-shadow:none;
+	border-radius:0;
+	padding:0;
+	overflow:visible;
+	cursor:pointer
+}
+.XClickEditor button[disabled] { cursor: default; }
+.XClickEditor .focus-visible-none:focus-visible { outline: none; }
+
+.XClickEditor .div_layer{
+	position: absolute;
+}
+.XClickEditor .div_layer:focus{
+	outline: none;
+}
+
+.ContentContainer {
+	position: relative;
+	width: 100%;
+	height: calc(100% - 27px);
+	background-color: #FFFFFF;
+	margin-top: 27px;
+	border: none;
+	overflow: hidden;
+}
+
+.XClickEditor .ToolbarContainer { position: absolute; top: 0; width: 100%; height: 26px; border-bottom: 1px solid rgb(206, 206, 206); }
+.XClickEditor .ToolbarContainer > ul > li { float: left; }
+.XClickEditor .ToolbarContainer > ul > li > button,
+.XClickEditor .ToolbarContainer > ul > li > div { display: flex; align-items: center; justify-content: center; width: 25px; height: 24px; }
+.XClickEditor .ToolbarContainer > ul > li > button.active { border-style: inset; }
+.XClickEditor .ToolbarContainer > ul > li > button > img { width: 18px; height: 18px; }
+.XClickEditor .ToolbarContainer > ul > li > button > span { }
+.XClickEditor .ToolbarContainer > ul > li > .toolbar-separator { width: 10px; }
+.XClickEditor .ToolbarContainer > ul > li > .toolbar-separator > div { width: 1px; height: 15px; border-left : solid 1px black; }
+.XClickEditor .ToolbarContainer > ul > li.select > button { width: 100px; justify-content: space-between; padding: 0 5px; }
+.XClickEditor .ToolbarContainer > ul > li.select > button::after { content: '▼'; }
+
+.ToolbarContainer .toolbar-item.toolbar-select {
+	width: 75px;
+	text-align: left;
+	padding-right: 10px;
+}
+.ToolbarContainer .toolbar-item.toolbar-select > span {
+	width: 100%;
+}
+.ToolbarContainer .toolbar-item.toolbar-select::after {
+	content: '▼';
+}
+.ToolbarContainer .separator-bar {
+	padding-left: 7px;
+	padding-right: 7px;
+}
+
+/*
+.ToolbarContainer .layer_select {
+	background-color: white;
+	width: 170px;
+	max-height: 120px;
+	overflow: auto;
+}
+
+.ToolbarContainer .layer_select button {
+	width: 100%;
+	text-align: left;
+}
+
+ */
+
+.layer_symbol_select {
+	display: grid;
+	grid-template-columns: repeat(15, 18px);
+	grid-template-rows: repeat(10, 18px);
+}
+
+.layer_table_select {
+	display: grid;
+	grid-template-columns: repeat(10, 14px);
+	grid-template-rows: repeat(10, 14px);
+}
+
+.layer_symbol_select button,
+.layer_table_select button {
+	width: 100%;
+	height: 100%;
+	vertical-align: top;
+}
+.layer_table_select > div {
+	border : solid 1px;
+	margin : 1px;
+}
+.layer_table_select > div.active {
+	background-color: #bcdefb;
+	border-color: #1F89E5;
+}
+
+
+.XClickEditor iframe {
+	width: 100%;
+	height: 100%;
+}
+/*
+.ContentContainer .div_layer.link {
+	width: 260px;
+	height: 26px;
+	padding: 5px;
+	background-color: red;
+}
+.ContentContainer .div_layer.link input {
+	height: 100%;
+	width: calc(100% - 80px);
+	box-sizing: border-box;
+}
+.ContentContainer .div_layer.link button {
+	height: 100%;
+	width: 40px;
+}
+*/
+
+
+/**
+ * widget
+ */
+.ContentContainer .widget { }
+.widget .dim {
+	position: absolute;
+	top : 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.widget .outline > div {
+	position: absolute;
+	background-color: yellow;
+}
+.widget .newline > .before,
+.widget .newline > .after {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+}
+
+.widget .resize-bar {
+	position: absolute;
+}
+
+.widget .link {
+	position: absolute;
+	width: 260px;
+	height: 26px;
+	padding: 5px;
+	background-color: red;
+}
+.widget .link input {
+	height: 100%;
+	width: calc(100% - 80px);
+	box-sizing: border-box;
+}
+.widget .link button {
+	height: 100%;
+	width: 40px;
+}
+
+.widget .cell_split {
+	position: absolute;
+	width: 200px;
+	top: calc(50% - 50px);
+	left: calc(50% - 100px);
+}
+
+/**
+ * Color Palette
+ */
+.XClickEditor .color_palette {
+	display: inline-block;
+	position: absolute;
+	z-index: 1;
+	margin-top: 16px;
+}
+.XClickEditor .color_palette > div {
+	display: grid;
+	grid-template-columns: repeat(10, 14px);
+	grid-template-rows: repeat(10, 14px);
+}
+.XClickEditor .color_palette > div button {
+	width: 100%;
+	height: 100%;
+}
+.XClickEditor .btn_palette_color {
+	width: 1em;
+	height: 1em;
+	border: solid 1px #8F8F8F;
+}
+
+.XClickEditor .layer_select { display: inline-block; position: absolute; z-index: 1; margin-top: 20px; margin-left: 5px; background: #FFFFFF; }
+/**
+ * BorderViewer
+ */
+.border_viewer { }
+.border_viewer > .wrap_viewer { display: flex; flex-direction: column; width: 150px; height: 150px; }
+.border_viewer > .wrap_viewer > .top { display: flex; justify-content: space-between; }
+.border_viewer > .wrap_viewer > .center { display: flex; flex: 1; }
+.border_viewer > .wrap_viewer > .center > .right { display: flex; flex-direction: column; justify-content: space-between; }
+.border_viewer > .wrap_viewer > .center > .content { display: flex; flex-direction: column; flex : 1 }
+.border_viewer > .wrap_viewer > .bottom { display: flex; justify-content: space-between; }
+
+.border_viewer > .wrap_viewer > .center > .content div { display: flex; }
+.border_viewer > .wrap_viewer > .center > .content > div:nth-child(2n) { flex: 1; }
+.border_viewer > .wrap_viewer > .center > .content > div:nth-child(2n-1) { height: 5px; }
+.border_viewer > .wrap_viewer > .center > .content > div > div:nth-child(2n) { flex: 1; }
+.border_viewer > .wrap_viewer > .center > .content > div > div:nth-child(2n-1) { width: 5px; }
+.border_viewer > .wrap_viewer > .center > .content > div > div[disabled] { visibility: hidden; }
+
+.border_viewer > .wrap_viewer { margin: 5px auto; }
+.border_viewer > .wrap_viewer > .center > .right { padding: 5px 0; }
+.border_viewer > .wrap_viewer > .top, .border_viewer > .wrap_viewer > .bottom { padding : 0 5px 0 20px }
+.border_viewer > .wrap_viewer > .center > .content { border: solid 1px black; margin: 5px; padding: 5px; }
+
+/*
+.border_viewer > .center > .content  button { height: 100%; width: 100%; background-color: red; }
+ */
+/**
+ *
+ */
+.XClickEditor .popup { display: flex; position: absolute; flex-direction: column; }
+.XClickEditor .popup .header { }
+.XClickEditor .popup .content { flex: 1; overflow-y: auto; }
+.XClickEditor .popup .footer { display: flex; justify-content: flex-end; }
+
+.XClickEditor .popup { background-color: white; border: solid 1px black; border-radius: 3px; padding: 5px }
+
+/**
+ * Cell Properties
+ */
+.cell_properties,.table_properties
+{
+	width: 360px;
+	height: 400px;
+	top: calc(50% - 200px);
+	left: calc(50% - 180px);
+}
+
+.cell_split_input {
+	width: 300px;
+	height: 100px;
+	top: calc(50% - 50px);
+	left: calc(50% - 100px);
+}
+
+.contextmenu {
+	width: 150px;
+	max-height: 300px;
+}
+
+/**
+ * Synbol List
+ */
+
+.XClickEditor .symbol_list {
+	display: inline-block;
+	position: absolute;
+	z-index: 1;
+	margin-top: 16px;
+	background-color: #FFFFFF;
+}
+.XClickEditor .symbol_list > div {
+	display: grid;
+	grid-template-columns: repeat(15, 14px);
+	grid-template-rows: repeat(10, 14px);
+}
+.XClickEditor .symbol_list > div button {
+	width: 100%;
+	height: 100%;
+}

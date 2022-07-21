@@ -1,0 +1,5 @@
+table:focus-within { outline: solid 2px blueviolet !important; }
+td:focus-visible { outline: none !important }
+[selected] { background: rgba(0,0,0, 0.3) !important; }
+td, th { box-sizing: border-box; }
+p { margin: 0;}

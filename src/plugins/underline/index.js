@@ -1,7 +1,15 @@
 import Plugin from "../../core/Plugin";
-import {getTextNodes, isCharacterDataNode, splitRange} from "../../utils/domUtils";
-import Toolbar from "./Toolbar";
+import {
+    getTextNodes,
+    removeNode,
+    splitNode,
+} from "../../utils/domUtils";
 import {Commands} from "../../core/Command";
+import {ToolbarItem} from "../../components/toolbar";
+import {t} from "i18next";
+import {isAppliedToElement} from "./utils";
+import underline from "./actions/underline";
+import unUnderline from "./actions/unUnderline";
 
 export default class UnderLine extends Plugin {
     get pluginName() {
@@ -18,71 +26,108 @@ export default class UnderLine extends Plugin {
         this.undo = this.pm.get('Undo');
         this.shortcut = this.pm.get('Shortcut');
 
-        this.shortcut.on('formatUnderline', (e)=>{ e.preventDefault(); this.underLine() });
+        this.shortcut.on('formatUnderline', this.action);
+        this.command.on(Commands.underline, this.action);
         this.command.on(Commands.update_selection, this.updateSelection);
     }
 
-    underLine = () => {
+    action = () => {
         let range = this.selection.getCurrentRange();
         if(!range) return;
 
         this.undo.flush();
-        if( range.collapsed ){
+        if(range.collapsed){
             const textNode = document.createTextNode('\u200B');
             range.insertNode(textNode);
 
-            const fontNode = document.createElement('font');
-            fontNode.style.textDecorationLine = 'underline';
+            const isApplied = isAppliedToElement(textNode);
+            if(isApplied){
+                const rtn = unUnderline(textNode);
+                !rtn && removeNode(textNode);
 
-            const _range = new Range();
-            _range.selectNode(textNode);
-            _range.surroundContents(fontNode);
+                rtn && this.selection.collapse(textNode, 1);
+            } else {
+                const rtn = underline(textNode);
 
-            this.selection.removeAllRanges();
-            this.selection.collapse(textNode, 1);
-
-            this.toolbar && (this.toolbar.active = true);
+                rtn && this.selection.collapse(textNode, 1);
+            }
         } else {
-            range = splitRange(range);
             const textNodes = getTextNodes(range);
+            let sc = textNodes[0];
+            let so = sc === range.startContainer ? range.startOffset : 0;
+            let ec = textNodes[textNodes.length - 1];
+            let eo = ec === range.endContainer ? range.endOffset : ec.length;
 
-            let isApplied = !(textNodes.some( node => {
+            const NOTAppliedNodes = textNodes.filter( node => {
                 return !isAppliedToElement(node);
-            }));
-
-            textNodes.forEach((textNode)=>{
-                const fontNode = document.createElement('font');
-                fontNode.style.textDecorationLine = isApplied ? 'normal' : 'underline' ;
-
-                const _range = new Range();
-                _range.selectNode(textNode);
-                _range.surroundContents(fontNode);
             });
 
-            this.selection.removeAllRanges();
-            const _range = new Range();
-            if(textNodes.length > 1){
-                _range.setStart(textNodes[0], 0);
-                _range.setEnd(textNodes[textNodes.length - 1], textNodes[textNodes.length - 1].length);
-            } else {
-                _range.selectNode(textNodes[0]);
-            }
-            this.selection.addRange(_range);
+            const isApplied = NOTAppliedNodes.length === 0;
 
-            this.toolbar && (this.toolbar.active = !isApplied);
+            if(isApplied){
+                textNodes.forEach((target)=>{
+                    if(target === range.startContainer){
+                        const nodes = splitNode(target, range.startOffset);
+                        target = nodes[1];
+                        sc = target;
+                        so = 0;
+                    }
+                    if(target === range.endContainer){
+                        const nodes = splitNode(target, range.endOffset);
+                        target = nodes[0];
+                        ec = target;
+                        eo = target.length
+                    }
+                    if(target) unUnderline(target);
+                });
+            } else {
+                NOTAppliedNodes.forEach((target)=>{
+                    if(target === range.startContainer){
+                        const nodes = splitNode(target, range.startOffset);
+                        target = nodes[1];
+                        sc = target
+                        so = 0;
+                    }
+                    if(target === range.endContainer){
+                        const nodes = splitNode(target, range.endOffset);
+                        target = nodes[0];
+                        ec = target;
+                        eo = target.length
+                    }
+                    if(target) underline(target);
+                });
+            }
+
+            const _range = new Range()
+            _range.setStart(sc, so);
+            _range.setEnd(ec, eo);
+            this.selection.removeAllRanges();
+            this.selection.addRange(_range);
         }
     }
 
     getToolbarItems () {
-        if(!this.toolbar){
-            this.toolbar = new Toolbar(this);
-        }
+        const onclick = async (e) => {
+            const value = e.currentTarget.value;
 
-        return this.toolbar.getItems();
+            await this.execCommand(value);
+            this.execCommand(Commands.focus);
+        };
+
+        const { root, button } = ToolbarItem.build({
+            title : t('toolbar.underline'),
+            value : Commands.underline,
+            imageClassName : 'img_toolbar_underline',
+            onclick : onclick
+        });
+
+        this.toolbarButton = button;
+
+        return [root];
     }
 
     updateSelection = () => {
-        if(!this.toolbar) return;
+        if( !this.toolbarButton ) return;
 
         let range = this.selection.getCurrentRange();
         if(!range) return;
@@ -95,18 +140,17 @@ export default class UnderLine extends Plugin {
             }));
         }
 
-        this.toolbar.active = isApplied
+        this.applyToolbar(isApplied);
+    }
+
+    applyToolbar = ( isApplied ) => {
+        if( !this.toolbarButton ) return;
+
+        if(isApplied && !this.toolbarButton.classList.contains('active')){
+            this.toolbarButton.classList.add('active');
+        } else if(!isApplied && this.toolbarButton.classList.contains('active')){
+            this.toolbarButton.classList.remove('active');
+        }
     }
 }
 
-const isAppliedToElement = (el) => {
-    if(isCharacterDataNode(el)){
-        el = el.parentNode;
-    }
-    const textDecorationLine = getComputedStyle(el).textDecorationLine;
-    if(textDecorationLine === 'underline'){
-        return true;
-    } else {
-        return false;
-    }
-}

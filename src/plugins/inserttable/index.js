@@ -1,7 +1,8 @@
 import Plugin from "../../core/Plugin";
 import {
+    calcTableSize,
     createBlockNode,
-    getBlockNode,
+    getBlockNode, getNodeOffset,
     getTextNodes,
     insertAfter,
     insertBefore, isBlockNode,
@@ -37,40 +38,45 @@ export default class InsertTable extends Plugin {
 
         this.undo.flush();
 
-        if(!range.collapsed) {
-            range.deleteContents();
+        range.deleteContents()
+
+        let node = range.commonAncestorContainer;
+        let offset = range.startOffset;
+        if(isCharacterDataNode(node) && offset !== 0 && offset !== node.length){
+            node.splitText(offset);
+        } else if(isCharacterDataNode(node) && offset === node.length) {
+            offset = getNodeOffset(node) + 1;
+            node = node.parentNode;
+        }
+        if(isCharacterDataNode(node)){
+            offset = getNodeOffset(node);
+            node = node.parentNode;
         }
 
-        if(range.collapsed){
-            let target = range.endContainer;
-            while( isBlockNode(target) ){
+        let splitNodes = null;
+        while(node.parentNode.isContentEditable) {
+            if( offset === node.length ){
+                offset = getNodeOffset(node) + 1;
+                node = node.parentNode;
+            } else {
+                splitNodes = splitNode(node, offset);
 
-
+                offset = getNodeOffset(node);
+                node = node.parentNode;
             }
-            // let cc;
-            // while( ( cc = range.commonAncestorContainer )
-            // && cc.tagName !== 'BODY'
-            // && cc.tagName !== 'HTML' ){
-            //     if(isCharacterDataNode(cc)){
-            //         range = splitNode(range);
-            //     } else if(!isBlockNode(cc.childNodes[range.startOffset])){
-            //         range = splitNode(range);
-            //     } else {
-            //         break;
-            //     }
-            // }
-
-            const tableNode = createTable(payload.row, payload.col);
-
-            const ec = range.commonAncestorContainer.childNodes[range.endOffset];
-            insertBefore(tableNode, ec);
-
-            range.setStart(ec, 0);
-            range.setEnd(ec, 0);
         }
+
+        const tableNode = createTable(payload.row, payload.col);
+        insertAfter(tableNode, splitNodes[0]);
+        calcTableSize(tableNode);
+
+        const _range = new Range()
+        const firstNode = tableNode.querySelector('td');
+        _range.setStart(firstNode, 0)
+        _range.setEnd(firstNode, 0)
 
         this.selection.removeAllRanges();
-        this.selection.addRange(range);
+        this.selection.addRange(_range);
     }
 
     getToolbarItems () {
@@ -90,6 +96,8 @@ const createTable = (row, col) => {
     table.style.borderColor = '#000000';
     table.style.borderCollapse = 'collapse';
     table.style.backgroundColor = '#FFFFFF';
+    table.style.wordBreak = 'break-all'
+    table.contentEditable = 'false';
 
     const tbody = document.createElement('tbody');
     table.appendChild(tbody);
@@ -107,10 +115,11 @@ const createTable = (row, col) => {
             td.style.borderWidth = '1px';
             td.style.borderStyle = 'solid';
             td.style.borderColor = '#000000';
+            td.contentEditable = 'true';
 
             td.appendChild(createBlockNode());
+        }
     }
-}
 
-return table;
+    return table;
 }

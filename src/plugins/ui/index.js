@@ -4,10 +4,12 @@ import RootContainer from './component/RootContainer';
 import ContentContainer from "./component/ContentContainer";
 import ToolBar from "./component/ToolBar";
 
-import './index.css'
+import contentStyle from './content.css';
+
 import { defaultContent } from "../../config";
 import { optimizedResize } from "../../utils/optimizedResize";
 import { Commands } from "../../core/Command";
+
 
 export default class UI extends Plugin {
     get pluginName() {
@@ -30,6 +32,7 @@ export default class UI extends Plugin {
         this.document.close();
 
         this.document.body.contentEditable = 'true';
+        contentStyle.use({target : this.document.head});
 
         optimizedResize(iframe.contentWindow);
 
@@ -39,12 +42,12 @@ export default class UI extends Plugin {
         this.command.on(Commands.plugin_load_complete, this.focus);
     }
 
-    focus = () => {
-        this.document.body.focus()
-    }
-
     initToolbar = async () => {
         const toolbar = ToolBar( this );
         this.rootContainer.appendChild(toolbar);
+    }
+
+    focus = () => {
+        this.document.body.focus()
     }
 }

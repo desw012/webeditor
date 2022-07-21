@@ -33,7 +33,6 @@ export default class Undo extends Plugin {
                 this.flush();
             }
         }
-
         this._buff.push(...mutations)
     }
 
@@ -158,7 +157,13 @@ export default class Undo extends Plugin {
         if(this._buff.length === 0) {
             return;
         }
-        const temp = this._buff.splice(0, this._buff.length);
+        let temp = this._buff.splice(0, this._buff.length);
+        temp = temp.filter((mutation)=>{
+            return !(mutation.type === 'attributes' && mutation.attributeName ==='selected');
+        })
+        if(temp.length === 0) {
+            return;
+        }
 
         if(temp[temp.length - 1].type === 'characterData'){
             const prevMutation = temp[temp.length - 1];

@@ -19,24 +19,29 @@ import UI from "./ui";
 import UIResizeWidget from "./uiresizewidget";
 import UITabletWidget from "./uitabletwidget";
 import UnderLine from "./underline";
-import UnorderedList from "./unorderedlist";
 import Undo from "./undo";
 import Symbol from "./symbol";
 import OrderedList from "./orderedlist";
 import InsertImage from "./insertimage";
 import Enter from "./enter";
+import InsertHtml from "./inserthtml";
+import EditTable from "./edittable";
+import ContextMenu from "./contextmenu";
 
 
 export default {
     'Align' : Align,
     'Bold' : Bold,
     'Content' : Content,
+    'ContextMenu' : ContextMenu,
     'Enter' : Enter,
+    'EditTable' : EditTable,
     'FontBackgroundColor' : FontBackgroundColor,
     'FontColor' : FontColor,
     'FontName' : FontName,
     'FontSize' : FontSize,
     'Indent' : Indent,
+    'InsertHtml' : InsertHtml,
     'InsertHorizontalRule' : InsertHorizontalRule,
     'InsertImage' : InsertImage,
     'InsertLink' : InsertLink,
@@ -53,6 +58,5 @@ export default {
     'UIResizeWidget' : UIResizeWidget,
     'UITableWidget' : UITabletWidget,
     'UnderLine' : UnderLine,
-    'Undo' : Undo,
-    'UnorderedList' : UnorderedList
+    'Undo' : Undo
 };

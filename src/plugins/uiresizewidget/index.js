@@ -1,5 +1,5 @@
 import Plugin from "../../core/Plugin";
-import {getParentNodeByNodeName} from "../../utils/domUtils";
+import {calcTableSize, getParentNodeByNodeName} from "../../utils/domUtils";
 import {Commands} from "../../core/Command";
 
 export default class UIResizeWidget extends Plugin {
@@ -139,7 +139,8 @@ export default class UIResizeWidget extends Plugin {
         this.hide();
 
         this.resize();
-        this.calcTableSize();
+
+        calcTableSize(this.target.closest('table'));
     }
 
     resize = () => {
@@ -214,32 +215,11 @@ export default class UIResizeWidget extends Plugin {
                         const width = nodeWidthMap.get(curr);
                         curr.style.width = `${width - diff}px`;
                     }
-
-
                 }
             });
         }
 
         this.command.emit(Commands.update_selection);
-    }
-
-    calcTableSize = () => {
-        const table = this.target.closest('table');
-        const iterator = document.createNodeIterator(table
-            , NodeFilter.SHOW_ELEMENT
-            , node => {
-                if(['TABLE', 'TD', 'TH'].indexOf(node.nodeName) > -1) return NodeFilter.FILTER_ACCEPT;
-                else if(['TD', 'TH'].indexOf(node.parentNode.nodeName) > -1) return NodeFilter.FILTER_REJECT;
-                else return NodeFilter.FILTER_SKIP;
-            });
-
-        let node;
-        while(node = iterator.nextNode()){
-            const rect = node.getBoundingClientRect()
-            node.style.width = `${rect.width}px`;
-            node.style.height = `${rect.height}px`;
-            node.style.boxSizing = 'border-box';
-        }
     }
 
 

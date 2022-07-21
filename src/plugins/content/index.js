@@ -18,7 +18,15 @@ export default class Content extends Plugin {
     }
 
     getContent = () => {
-        return replaceHost(this.ui.document.body.innerHTML);
+        const content = this.ui.document.body.cloneNode(true);
+
+        //remove editable
+        const contentEditableNodes = content.querySelectorAll('[contenteditable]')
+        for(const node of contentEditableNodes){
+            node.removeAttribute('contenteditable')
+        }
+
+        return replace(content.innerHTML);
     }
 
     setContent = ( strContent ) => {
@@ -26,7 +34,7 @@ export default class Content extends Plugin {
     }
 }
 
-const replaceHost = (strContent) => {
+const replace = (strContent) => {
     strContent = strContent.replace(/[\u200B-\u200D\uFEFF]/g, '');
 
     strContent = strContent.replace(new RegExp("http://"+location.host+":80"+_webapp+"/DownController", "g"), _webapp+"/DownController");

@@ -1,9 +1,13 @@
 import Plugin from "../../core/Plugin";
 import {
+    createBlockNode,
+    getNodeOffset, insertAfter,
+    isCharacterDataNode, splitNode,
     splitTextNode
 } from "../../utils/domUtils";
-import Toolbar from "./Toolbar";
 import {Commands} from "../../core/Command";
+import {ToolbarItem} from "../../components/toolbar";
+import { t } from "i18next";
 
 /**
  * 텍스트 삽입
@@ -15,7 +19,7 @@ export default class InsertHorizontalRule extends Plugin {
     }
 
     get required(){
-        return ['UI', 'Selection', 'Undo']
+        return ['UI', 'Selection', 'Undo', 'Enter']
     }
 
     init() {
@@ -23,69 +27,74 @@ export default class InsertHorizontalRule extends Plugin {
         this.selection = this.pm.get('Selection');
         this.undo = this.pm.get('Undo');
 
-        this.command.on(Commands.insertHorizontalRule, this.insertHorizontalRule);
+        this.command.on(Commands.insertHorizontalRule, this.action);
     }
 
-    insertHorizontalRule = () => {
+    //FIXME
+    action = () => {
         let range = this.selection.getCurrentRange();
         if(!range) return;
 
         this.undo.flush();
 
         range.deleteContents();
-        range = splitTextNode(range);
 
-        const cc = range.commonAncestorContainer;
-        const sc = range.startContainer;
-        const so = range.startOffset;
-        const ec = range.endContainer;
-        const eo = range.endOffset;
-
-        const endNode = ec.childNodes[eo];
-/*
-        if(range.collapsed){
-            if('BODY' === ec.tagName ){
-
-            }
-            const blockNode = getBlockNode(endNode);
-            if('BODY' === ec.tagName && !endNode) {
-                const hr = document.createElement('hr');
-                ec.appendChild(hr);
-                range.collapse();
-            }else if('BODY' === ec.tagName && endNode){
-                const hr = document.createElement('hr');
-                insertBefore(hr, endNode);
-                const block = createBlockNode();
-                insertBefore(block, endNode);
-
-                range.selectNode(block);
-                range.collapse();
-            } else {
-                // const blockNode = getBlockNode(range.commonAncestorContainer);
-                // const node = range.startContainer.childNodes[range.startOffset].previousSibling;
-                // if(blockNode !== node){
-                //     splitNodeToTarget(blockNode, node);
-                // }
-                //
-                // insertBefore(hr, blockNode);
-            }
-
-
-
-
-
-            this.selection.removeAllRanges();
-            this.selection.addRange(range);
+        let node = range.commonAncestorContainer;
+        let offset = range.startOffset;
+        if(isCharacterDataNode(node) && offset !== 0 && offset !== node.length){
+            node.splitText(offset);
+        } else if(isCharacterDataNode(node) && offset === node.length) {
+            offset = getNodeOffset(node) + 1;
+            node = node.parentNode;
+        }
+        if(isCharacterDataNode(node)){
+            offset = getNodeOffset(node);
+            node = node.parentNode;
         }
 
- */
+        let splitNodes = null;
+        while(node.parentNode.isContentEditable) {
+            if( offset === node.length ){
+                offset = getNodeOffset(node) + 1;
+                node = node.parentNode;
+            } else {
+                splitNodes = splitNode(node, offset);
+
+                offset = getNodeOffset(node);
+                node = node.parentNode;
+            }
+        }
+
+        const _range = new Range()
+        if(splitNodes[1]){
+            _range.selectNodeContents(splitNodes[1]);
+            _range.collapse(true);
+        } else {
+            const newLine = createBlockNode(splitNodes[0]);
+            insertAfter(newLine, splitNodes[0])
+
+            _range.selectNodeContents(newLine);
+            _range.collapse(true);
+        }
+
+        if(_range.commonAncestorContainer.clientHeight === 0){
+            _range.insertNode(document.createElement('br'));
+        }
+
+        insertAfter(document.createElement('hr'), splitNodes[0])
+
+        this.selection.removeAllRanges();
+        this.selection.addRange(_range);
     }
 
     getToolbarItems () {
-        if(!this.toolbar){
-            this.toolbar = new Toolbar(this);
-        }
+        const { root  } = ToolbarItem.build({
+            title : t('toolbar.insertHorizontalRule'),
+            value : Commands.outdent,
+            imageClassName : 'img_toolbar_insert-horizontal-rule',
+            onclick : onclick
+        });
 
-        return this.toolbar.getItems();
+        return [root];
     }
 }

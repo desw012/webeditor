@@ -1,7 +1,9 @@
 import Plugin from "../../core/Plugin";
 import { getBlockNodes } from "../../utils/domUtils";
-import Toolbar from "./Toolbar";
-import {Commands} from "../../core/Command";
+import { Commands } from "../../core/Command";
+import { ToolbarItem } from "../../components/toolbar";
+import { t } from "i18next";
+import align from "./actions/align";
 
 /**
  * [문단 정렬]
@@ -14,13 +16,12 @@ export default class Align extends Plugin {
         this.selection = this.pm.get('Selection');
         this.undo = this.pm.get('Undo');
 
-        this.command.on(Commands.justifyLeft, () => { this.align('left') });
-        this.command.on(Commands.justifyCenter, () => { this.align('center') });
-        this.command.on(Commands.justifyRight, () => { this.align('right') });
-        this.command.on('align', this.align );
+        this.command.on(Commands.justifyLeft, () => { this.action('left') });
+        this.command.on(Commands.justifyCenter, () => { this.action('center') });
+        this.command.on(Commands.justifyRight, () => { this.action('right') });
     }
 
-    align = (payload) => {
+    action = (payload) => {
         if(!payload) return;
 
         let range = this.selection.getCurrentRange();
@@ -29,20 +30,41 @@ export default class Align extends Plugin {
         this.undo.flush();
 
         const blockNodes = getBlockNodes(range);
-
         blockNodes.forEach((node)=>{
-            if(node.nodeName === 'TABLE'){
-                 return;
-            }
-            node.style.textAlign = payload;
+            align(node, payload);
         });
     }
 
     getToolbarItems () {
-        if(!this.toolbar){
-            this.toolbar = new Toolbar(this);
-        }
+        const onclick = async (e) => {
+            const value = e.currentTarget.value;
 
-        return this.toolbar.getItems();
+            await this.execCommand(value);
+            this.execCommand(Commands.focus);
+        };
+
+        const { root : alignLeft } = ToolbarItem.build({
+            title : t('toolbar.align.left'),
+            value : Commands.justifyLeft,
+            imageClassName : 'img_toolbar_align_left',
+            onclick : onclick
+
+        });
+
+        const { root : alignCenter } = ToolbarItem.build({
+            title : t('toolbar.align.center'),
+            value : Commands.justifyCenter,
+            imageClassName : 'img_toolbar_align_center',
+            onclick : onclick
+        });
+
+        const { root : alignRight } = ToolbarItem.build({
+            title : t('toolbar.align.right'),
+            value : Commands.justifyRight,
+            imageClassName : 'img_toolbar_align_right',
+            onclick : onclick
+        });
+
+        return [ alignLeft, alignCenter, alignRight ];
     }
 }
