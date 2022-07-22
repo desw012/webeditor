@@ -29,7 +29,7 @@ export default class LineHeight extends Plugin {
 
         this.undo.flush();
         const blockNodes = getBlockNodes(range);
-
+console.log(blockNodes);
         blockNodes.forEach((node)=>{
             lineHeight(node, payload);
         });
@@ -62,6 +62,7 @@ export default class LineHeight extends Plugin {
 
             if(lineHeight){
                 this.action(lineHeight);
+                this.applyToolbar(lineHeight);
                 this.ui.focus();
             }
         }
@@ -85,11 +86,12 @@ export default class LineHeight extends Plugin {
             case 'normal' :
                 text = '120%';
                 break;
-            case payload.endsWith('px') :
-                if(styles){
-                    payload.replace('')
-                }
             default :
+                if(payload.endsWith('px') && styles){
+                    const lineHeight = Number(payload.replace('px', ''));
+                    const fontSize = Number(styles.fontSize.replace('px', ''));
+                    text = `${ Math.floor(lineHeight/fontSize*100 )}%`;
+                }
                 break;
         }
 

@@ -46,6 +46,10 @@ export default class Selection extends Plugin {
         return this.currentRange?.cloneRange();
     }
 
+    getSelection = () => {
+        return this.selection;
+    }
+
     removeAllRanges = () => {
         this.selection.removeAllRanges();
     }

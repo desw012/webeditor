@@ -68,7 +68,12 @@ export const splitRange = (range) => {
 
 
 
-export const getBlockNode = (node) => {
+export const getBlockNode = (node, offset) => {
+    if(!isCharacterDataNode(node) && isNaN(offset)){
+        const _node = node.childNodes[offset];
+        node && (node = _node);
+    }
+
     let curr, next = node;
     while(curr = next){
         next = curr.parentNode;
@@ -361,28 +366,49 @@ export const getBlockNodes = (range) => {
         endOffset : eo
     } = range;
 
-    const blockNodes = new Array();
-
-    const scBlockNode = getBlockNode(sc);
+    const scBlockNode = getBlockNode(sc, so);
     const ccBlockNode = getBlockNode(cc);
     const ecBlockNode = getBlockNode(ec);
 
-    if(ccBlockNode === scBlockNode){
-        blockNodes.push(scBlockNode);
-    } else {
-        const p = cc.closest('body, td, th');
-        const nodes = p.querySelectorAll('*');
-
-        let find = false;
-        for(const curr of nodes){
-            if(!isBlockNode(curr)) continue;
-            if(curr === scBlockNode){ find = true; }
-            if(find){ blockNodes.push(curr); }
-            if(curr === ecBlockNode){ break; }
+    const blockNodes = new Array();
+    const nodes = cc.querySelectorAll('*');
+    let find = false;
+    for( const curr of nodes ) {
+        if(!find && curr.contains(sc)){ find = true; }
+        if(!isBlockNode(curr)) continue;
+        if(find){ blockNodes.push(curr); }
+        if(curr === ecBlockNode){
+            break;
         }
     }
 
+    if(blockNodes.length === 0){
+        ccBlockNode && (blockNodes.push(ccBlockNode));
+    }
     return blockNodes;
+
+    // const scBlockNode = getBlockNode(sc);
+    // const ccBlockNode = getBlockNode(cc);
+    // const ecBlockNode = getBlockNode(ec);
+    //
+    //
+    //
+    // if(ccBlockNode === scBlockNode){
+    //     blockNodes.push(scBlockNode);
+    // } else {
+    //     const p = cc.closest('body, td, th');
+    //     const nodes = p.querySelectorAll('*');
+    //
+    //     let find = false;
+    //     for(const curr of nodes){
+    //         if(!isBlockNode(curr)) continue;
+    //         if(curr === scBlockNode){ find = true; }
+    //         if(find){ blockNodes.push(curr); }
+    //         if(curr === ecBlockNode){ break; }
+    //     }
+    // }
+    //
+    // return blockNodes;
 }
 
 /**
